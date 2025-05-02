@@ -10,7 +10,7 @@ import { api, APIResponse } from "../../services/api";
 import {
   LasTransactionsResponse,
   RequestCreateTransaction,
-  RequestTransactionsToYear,
+  RequestDeleteTransaction,
   TransactionsToYearResponse,
 } from "./types";
 import { monthNames } from "../../utils/monthNames";
@@ -49,19 +49,19 @@ function* lastTransactions() {
   }
 }
 
-function* transactionsToYear(action: PayloadAction<RequestTransactionsToYear>) {
-  const isAuthenticated: boolean = yield select(
-    (state: RootState) => state.user.isAuthenticated
-  );
-
-  if (!isAuthenticated) return;
-
+function* transactionsToYear() {
   try {
+    const isAuthenticated: boolean = yield select(
+      (state: RootState) => state.user.isAuthenticated
+    );
+
+    if (!isAuthenticated) return;
+
     const transactions: APIResponse<
       AxiosResponse<TransactionsToYearResponse[]>
     > = yield call(api.get, "/reports/transactions", {
       params: {
-        year: action.payload.year || new Date().getFullYear(),
+        year: new Date().getFullYear(),
       },
     });
     yield put(
@@ -101,11 +101,32 @@ function* createTransaction(action: PayloadAction<RequestCreateTransaction>) {
   }
 }
 
+function* deleteTransaction(action: PayloadAction<RequestDeleteTransaction>) {
+  try {
+    yield call(api.delete, `/reports/${action.payload.id}`);
+
+    yield put(reportsSlice.actions.successDeleteTransaction());
+  } catch (error) {
+    if (error instanceof Error) {
+      yield put({ type: "REPORT_DELETE_FAILED", message: error.message });
+    }
+    if (error instanceof AxiosError) {
+      yield put({ type: "REPORT_DELETE_FAILED", message: error.message });
+    }
+  }
+}
+
 export function* reportSaga() {
   yield all([
+    // reload
     takeEvery("persist/REHYDRATE", lastTransactions),
     takeEvery("persist/REHYDRATE", transactionsToYear),
 
+    // create
+    takeEvery(
+      reportsSlice.actions.requestCreateTransaction.type,
+      createTransaction
+    ),
     takeEvery(
       reportsSlice.actions.successCreateTransaction.type,
       lastTransactions
@@ -115,12 +136,22 @@ export function* reportSaga() {
       transactionsToYear
     ),
 
+    // delete
+    takeEvery(
+      reportsSlice.actions.requestDeleteTransaction.type,
+      deleteTransaction
+    ),
+    takeEvery(
+      reportsSlice.actions.successDeleteTransaction.type,
+      lastTransactions
+    ),
+    takeEvery(
+      reportsSlice.actions.successDeleteTransaction.type,
+      transactionsToYear
+    ),
+
+    // login
     takeEvery(userSlice.actions.setUser.type, lastTransactions),
     takeEvery(userSlice.actions.setUser.type, transactionsToYear),
-
-    takeEvery(
-      reportsSlice.actions.requestCreateTransaction.type,
-      createTransaction
-    ),
   ]);
 }

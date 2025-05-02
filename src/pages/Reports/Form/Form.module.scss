@@ -74,8 +74,27 @@
   cursor: pointer;
 }
 
+.container form button[disabled] {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
 .type {
   flex-direction: row !important;
   align-items: center !important;
   justify-content: center;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.error {
+  color: red;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
 }

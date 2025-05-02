@@ -35,3 +35,7 @@ export interface RequestCreateTransaction {
   description: string;
   client: string | null;
 }
+
+export interface RequestDeleteTransaction {
+  id: string;
+}

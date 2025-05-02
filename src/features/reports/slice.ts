@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   LasTransactionsResponse,
   RequestCreateTransaction,
+  RequestDeleteTransaction,
   RequestTransactionsToYear,
   TransactionsToYearResponse,
 } from "./types";
@@ -72,6 +73,7 @@ const initialState = {
     },
   ],
   created: false,
+  deleted: false,
 };
 
 export const reportsSlice = createSlice({
@@ -114,6 +116,17 @@ export const reportsSlice = createSlice({
     },
     resetCreateTransaction: (state) => {
       state.created = false;
+    },
+
+    requestDeleteTransaction: (
+      _state,
+      _action: PayloadAction<RequestDeleteTransaction>
+    ) => {},
+    successDeleteTransaction: (state) => {
+      state.deleted = true;
+    },
+    resetDeleteTransaction: (state) => {
+      state.deleted = false;
     },
   },
 });

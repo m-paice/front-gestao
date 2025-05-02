@@ -1,4 +1,6 @@
 .container {
+  position: relative;
+
   width: 100%;
   padding: 10px 20px;
   background-color: #fff;
@@ -6,6 +8,29 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
   cursor: pointer;
+
+  button {
+    background-color: transparent;
+    cursor: pointer;
+    padding: 10px;
+    border: none;
+    transition: background-color 0.5s;
+    border-radius: 50%;
+
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+
+    img {
+      width: 30px;
+      height: 30px;
+      object-fit: cover;
+    }
+  }
+
+  button:hover {
+    background-color: #e0e0e0;
+  }
 }
 
 .container header {

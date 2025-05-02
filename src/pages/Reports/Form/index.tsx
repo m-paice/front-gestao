@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useFormik } from "formik";
+import { toFormikValidationSchema } from "zod-formik-adapter";
+import { z } from "zod";
 
 // components
 import { Badge } from "../../../components/Badge";
@@ -11,6 +13,22 @@ import classes from "./Form.module.scss";
 // features
 import { useAppDispatch, useAppSelector } from "../../../features";
 import { reportsSlice } from "../../../features/reports/slice";
+
+const formSchema = z.object({
+  type: z.enum(["in", "out"]),
+  month: z.string(),
+  value: z.number(),
+  description: z.string().min(1),
+  client: z.string().optional(),
+});
+
+const formKeys = {
+  value: "Valor",
+  description: "Descrição",
+  client: "Cliente",
+  type: "Tipo",
+  month: "Mês",
+};
 
 export const ReportsForm = () => {
   const navigate = useNavigate();
@@ -28,11 +46,12 @@ export const ReportsForm = () => {
   const formik = useFormik({
     initialValues: {
       type: "in",
-      month: "0",
-      value: "",
+      month: new Date().getMonth().toString(),
+      value: 0,
       description: "",
       client: "",
     },
+    validationSchema: toFormikValidationSchema(formSchema),
     onSubmit: (values) => {
       dispatch(
         reportsSlice.actions.requestCreateTransaction({
@@ -128,7 +147,23 @@ export const ReportsForm = () => {
           </section>
         )}
 
-        <button type="submit">Cadastrar</button>
+        <button type="submit" disabled={formik.isSubmitting}>
+          Cadastrar
+        </button>
+
+        {formik.isSubmitting && (
+          <p className={classes.loading}>carregando...</p>
+        )}
+
+        {Object.keys(formik.errors).length > 0 && (
+          <p className={classes.error}>
+            {Object.entries(formik.errors).map(([key, error]) => (
+              <span key={key}>
+                {formKeys[key as keyof typeof formKeys]}:{error}
+              </span>
+            ))}
+          </p>
+        )}
       </form>
     </div>
   );

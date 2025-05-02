@@ -1,0 +1,81 @@
+.container {
+  background-color: #f0f0f0;
+  padding-block: 40px;
+  padding-inline: 20px;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+
+  gap: 20px;
+
+  overflow-y: auto;
+}
+
+.container header {
+  width: 100%;
+  min-height: 50px;
+
+  display: flex;
+  align-items: center;
+}
+
+.container > header > h2 {
+  font-size: 16px;
+  color: gray;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.container form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  width: 100%;
+  max-width: 400px;
+}
+
+.container form section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.container form label {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.container form input,
+.container form select {
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.container form select {
+  background-color: #fff;
+}
+
+.container form input:focus {
+  border-color: #563d7c;
+}
+
+.container form button {
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  background-color: #563d7c;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.type {
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center;
+}

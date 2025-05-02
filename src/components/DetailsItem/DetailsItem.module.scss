@@ -1,0 +1,27 @@
+.container {
+  width: 100%;
+  padding: 10px 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+  cursor: pointer;
+}
+
+.container header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 10px;
+}
+
+.container header p {
+  font-size: 14px;
+  color: gray;
+  font-weight: 400;
+}
+
+.container p {
+  margin-bottom: 5px;
+}

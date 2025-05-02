@@ -1,0 +1,54 @@
+name: Build and Deploy Docker Image
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Get version from package.json
+        id: get_version
+        run: echo "::set-output name=VERSION::$(jq -r '.version' < package.json)"
+
+      - name: Log version
+        run: echo "Version is ${{ steps.get_version.outputs.VERSION }}"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the project
+        run: npm run build
+
+      - name: Build and tag Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:${{ steps.get_version.outputs.VERSION }} .
+          docker tag ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:${{ steps.get_version.outputs.VERSION }} ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:latest
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:${{ steps.get_version.outputs.VERSION }}
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:latest
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.DO_SSH_KEY }}
+
+      - name: Deploy to DigitalOcean
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:${{ steps.get_version.outputs.VERSION }}
+            docker stop ${{ secrets.CONTAINER_NAME }} || true
+            docker rm ${{ secrets.CONTAINER_NAME }} || true
+            docker run -d --name ${{ secrets.CONTAINER_NAME }} -p 3004:80 --restart always ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:${{ steps.get_version.outputs.VERSION }}
+          EOF
